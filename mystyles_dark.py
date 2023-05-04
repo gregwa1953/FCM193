@@ -8,7 +8,7 @@
 # Copyright © 2022, 2023  by G.D. Walters
 # This source code is released under the MIT License
 # ======================================================
-# Version 2.05.4𝛽
+# Version 2.05.7𝛽
 # ======================================================
 # Version history
 #    Pre-2.0 proof of concept
@@ -20,6 +20,13 @@
 #               Added add_options function.  REQUIRES Toplevel to be passed as a parameter.
 #    2.05.2 - 3 May, 2023 - Setup basic style for Treeview - subject to change
 #    2.05.4𝛽 - 3 May, 2023 - Removed custom graphics from TCheckbutton and TRadiobutton
+#    2.05.5𝛽 - 4 May, 2023 - Removed dead code
+#    2.05.6𝛽 - 4 May, 2023 - Added Toolbutton style for TButton,
+#                            Tweaked TSpinbox style,
+#                            Tweaked Treeview style,
+#                            Tweaked TMenubutton style,
+#                            Added Global Toplevel color information
+#    2.05.7𝛽 - 4 May, 2023 - Fixed TRadiobutton and TCheckbutton custom graphics
 # ======================================================
 #  Still to do 3 May, 2023
 # ------------------------------------------------------
@@ -50,7 +57,7 @@ import os.path
 
 _script = sys.argv[0]
 location = os.path.dirname(_script)
-version = "2.05.4𝛽"
+version = "2.05.7𝛽"
 # ===================================================
 # Global Color definitions
 # ===================================================
@@ -68,20 +75,59 @@ fieldbgcolor = "gray20"
 fieldfgcolor = "gray79"
 _bordercolor = "dimgray"
 tvwindow = "lightgoldenrod3"
-tvwindow = "peachpuff3"
+tvwindowdisabled = "peachpuff3"
 selectbackground = "#93ba45"
 selectforeground = "black"
 
 
 def create_styles(sty):
+    # sty.configure(
+    #     "Formatted.TLabel",
+    #     font="Ubuntu 12 bold",
+    #     # anchor=tk.CENTER,
+    #     background=bgcolor,
+    #     foreground=fgcolor,
+    # )
+    # ===================================================
+    # Apply a "generic" Toplevel style
+    # ===================================================
     sty.configure(
-        "Formatted.TLabel",
-        font="Ubuntu 12 bold",
-        # anchor=tk.CENTER,
-        background=bgcolor,
-        foreground=fgcolor,
+        ".",
+        bgcolor="gray24",
+        fgcolor="gray78",
+        activebgcolor="gray66",
+        activefgcolor="gray5",
+        troughcolor="gray43",
+        barcolor="gray82",
+        _darkcolor=bgcolor,
+        _lightcolor=fgcolor,
+        disabledcolor="gray27",
+        disabledfgcolor="gray3",
+        fieldbgcolor="gray20",
+        fieldfgcolor="gray79",
+        _bordercolor="dimgray",
+        tvwindow="lightgoldenrod3",
+        tvwindowdisabled="peachpuff3",
+        selectbackground="#93ba45",
+        selectforeground="black",
     )
-    sty.configure("TLable", background=bgcolor, foreground=fgcolor)
+    sty.map(
+        ".",
+        background=[("disabled", disabledcolor), ("active", activebgcolor)],
+        foreground=[("disabled", disabledfgcolor)],
+        selectbackground=[("!focus", selectbackground)],
+        selectforeground=[("!focus", "white")],
+        embossed=[("disabled", 1)],
+    )
+    # ===================================================
+    # Style for ALL TLabel widgets
+    # ===================================================
+    sty.configure(
+        "TLable",
+        background=bgcolor,
+        foreground="black",
+        font="Ubuntu 9 bold",
+    )
     # ===================================================
     # Style for ALL TButton widgets
     # ===================================================
@@ -113,21 +159,174 @@ def create_styles(sty):
         foreground=[("disabled", "snow"), ("active", activefgcolor)],
     )
 
-    # sty.map("Toolbutton",)
-    # sty.map(
-    #     "Toolbutton",
-    #     relief=[
-    #         ("disabled", "flat"),
-    #         ("selected", "sunken"),
-    #         ("active", "raised"),
-    #         ("pressed", "sunken"),
-    #     ],
-    #     background=[
-    #         ("disabled", "disabledcolor"),
-    #         ("pressed", "darkcolor"),
-    #         ("active", "activebgcolor"),
-    #     ],  # ,lightcolor=[("pressed","darker")],darkcolor=[("pressed","darker")]]
-    # )
+    sty.configure(
+        "Toolbutton",
+        anchor="center",
+        background=bgcolor,
+        foreground=fgcolor,
+        relief="flat",
+        highlightcolor=_bordercolor,
+        shiftrelief=2,
+        highlightthickness=2,
+        padding=2,
+        font="Veranda 12 bold",
+    )
+    sty.map(
+        "Toolbutton",
+        background=[
+            ("disabled", disabledcolor),
+            ("active", "gray49"),
+        ],
+        foreground=[("disabled", "snow"), ("active", activefgcolor)],
+    )
+
+    # ===================================================
+    # Style for ALL TCheckbutton
+    # ===================================================
+    shared.con_image = tk.PhotoImage(
+        file=os.path.join(location, "Assets/lightchk24x16.png")
+    )
+    shared.coff_image = tk.PhotoImage(
+        file=os.path.join(location, "Assets/lightunchk24x16.png")
+    )
+    shared.cdis_image = tk.PhotoImage(
+        file=os.path.join(location, "Assets/blank24x16.png")
+    )
+    sty.element_create(
+        "custom.CBindicator",
+        "image",
+        shared.coff_image,
+        ("selected", shared.con_image),
+        ("disabled", shared.cdis_image),
+    )
+    sty.configure(
+        "TCheckbutton",
+        background=bgcolor,
+        foreground=fgcolor,
+        indicatormargin=[6, 6, 6, 6],
+        padding=[6, 6, 6, 6],
+        font="Ubuntu 10 bold",
+    )
+    sty.layout(
+        "TCheckbutton",
+        [
+            (
+                "Checkbutton.padding",
+                {
+                    "sticky": "nswe",
+                    "children": [
+                        ("custom.CBindicator", {"side": "left", "sticky": ""}),
+                        (
+                            "Checkbutton.focus",
+                            {
+                                "side": "left",
+                                "sticky": "e",
+                                "children": [("Checkbutton.label", {"sticky": "nse"})],
+                            },
+                        ),
+                    ],
+                },
+            )
+        ],
+    )
+    sty.map(
+        "TCheckbutton",
+        background=[
+            ("disabled", bgcolor),
+            ("pressed", activebgcolor),
+            ("active", activebgcolor),
+            ("hover", activebgcolor),
+            # ("selected", tvwindow),
+        ],
+        foreground=[
+            ("disabled", disabledfgcolor),
+            ("pressed", activefgcolor),
+            ("active", activefgcolor),
+            ("hover", activefgcolor),
+        ],
+    )
+
+    # ===================================================
+    # Style for ALL TRadiobuttons
+    # ===================================================
+    # ===================================================
+    # Style for ALL TRadiobuttons
+    # ===================================================
+    shared.Ron_image = tk.PhotoImage(
+        file=os.path.join(location, "Assets/RadioSelected24x16.png")
+    )
+    shared.Roff_image = tk.PhotoImage(
+        file=os.path.join(location, "Assets/RadioUnSelected24x16.png")
+    )
+    shared.Rdis_image = tk.PhotoImage(
+        file=os.path.join(location, "Assets/blank24x16.png")
+    )
+    sty.element_create(
+        "custom.indicator",
+        "image",
+        shared.Roff_image,
+        ("selected", shared.Ron_image),
+        ("disabled", shared.Rdis_image),
+    )
+    sty.configure(
+        "TRadiobutton",
+        background=bgcolor,
+        foreground=fgcolor,
+        indicatormargin=[6, 6, 6, 6],
+        padding=[6, 6, 6, 6],
+        font="Ubuntu 8 bold",
+    )
+    sty.layout(
+        "TRadiobutton",
+        [
+            (
+                "Radiobutton.padding",
+                {
+                    "sticky": "nswe",
+                    "children": [
+                        ("custom.indicator", {"side": "left", "sticky": ""}),
+                        (
+                            "Radiobutton.focus",
+                            {
+                                "side": "left",
+                                "sticky": "",
+                                "children": [("Radiobutton.label", {"sticky": "nswe"})],
+                            },
+                        ),
+                    ],
+                },
+            )
+        ],
+    )
+    sty.map(
+        "TRadiobutton",
+        background=[
+            ("disabled", bgcolor),
+            ("pressed", activebgcolor),
+            ("active", activebgcolor),
+            ("hover", activebgcolor),
+            # ("selected", "springgreen3"),
+        ],
+        foreground=[
+            ("disabled", disabledfgcolor),
+            ("pressed", activefgcolor),
+            ("active", activefgcolor),
+            ("hover", activefgcolor),
+        ],
+    )
+
+    # ===================================================
+    # Style for ALL TProgressbars
+    # ===================================================
+
+    sty.configure(
+        "bar.Horizontal.TProgressbar",
+        troughcolor=troughcolor,
+        bordercolor=troughcolor,
+        background=barcolor,
+        lightcolor=barcolor,
+        darkcolor=barcolor,
+    )
 
     # ===================================================
     # Style for TCombobox (in progress)
@@ -149,152 +348,11 @@ def create_styles(sty):
         borderwidth=2,
         relief="sunken",
     )
-    # sty.option_add("*TCombobox*Listbox*Background", tvwindow)
-    # ===================================================
-    # Style for TEntry (in progress)
-    # Entry images borrowed from Sun-Valley-Ttk-Theme-Master
-    # ===================================================
-    sty.configure("TEntry", foreground="black", fieldbackground=tvwindow)
-
-    # ===================================================
-    # This layout will replace the standard indicator
-    # from TCheckbuttons that are told to use this style
-    # ===================================================
-    # shared.on_image = tk.PhotoImage(file=os.path.join(location, "Assets/chk16.png"))
-    # shared.off_image = tk.PhotoImage(file=os.path.join(location, "Assets/unchk16.png"))
-    # shared.dis_image = tk.PhotoImage(
-    #     file=os.path.join(location, "Assets/Disabled1.png")
-    # )
-    # sty.element_create(
-    #     "custom.CBindicator",
-    #     "image",
-    #     shared.off_image,
-    #     ("selected", shared.on_image),
-    #     ("disabled", shared.dis_image),
-    # )
-
-    sty.configure(
-        "TCheckbutton",
-        background=bgcolor,
-        foreground=fgcolor,
-        indicatormargin=[6, 6, 6, 6],
-        padding=[6, 6, 6, 6],
-    )
-    # sty.layout(
-    #     "TCheckbutton",
-    #     [
-    #         (
-    #             "Checkbutton.padding",
-    #             {
-    #                 "sticky": "nswe",
-    #                 "children": [
-    #                     ("custom.CBindicator", {"side": "left", "sticky": ""}),
-    #                     (
-    #                         "Checkbutton.focus",
-    #                         {
-    #                             "side": "left",
-    #                             "sticky": "",
-    #                             "children": [("Checkbutton.label", {"sticky": "nswe"})],
-    #                         },
-    #                     ),
-    #                 ],
-    #             },
-    #         )
-    #     ],
-    # )
-    sty.map(
-        "TCheckbutton",
-        background=[
-            ("disabled", disabledcolor),
-            ("pressed", activebgcolor),
-            ("active", activebgcolor),
-            ("hover", activebgcolor),
-        ],
-        foreground=[
-            ("disabled", disabledfgcolor),
-            ("pressed", activefgcolor),
-            ("active", activefgcolor),
-            ("hover", activefgcolor),
-        ],
-    )
-    # ===================================================
-    # This layout will replace the standard indicator
-    # from TRadiobuttons that are told to use this style
-    # ===================================================
-    # shared.on_image3 = tk.PhotoImage(file=os.path.join(location, "Assets/radio-nc.png"))
-    # shared.off_image3 = tk.PhotoImage(
-    #     file=os.path.join(location, "Assets/radio-nu.png")
-    # )
-    # shared.dis_image2 = tk.PhotoImage(
-    #     file=os.path.join(location, "Assets/Alternate1.png")
-    # )
-
-    # sty.element_create(
-    #     "custom.indicator",
-    #     "image",
-    #     shared.off_image3,
-    #     ("selected", shared.on_image3),
-    #     ("disabled", shared.dis_image2),
-    # )
-    sty.configure(
-        "TRadiobutton", background=bgcolor, foreground=fgcolor, padding=[5, 1, 5, 1]
-    )
-    # sty.layout(
-    #     "TRadiobutton",
-    #     [
-    #         (
-    #             "Radiobutton.padding",
-    #             {
-    #                 "sticky": "nswe",
-    #                 "children": [
-    #                     ("custom.indicator", {"side": "left", "sticky": ""}),
-    #                     (
-    #                         "Radiobutton.focus",
-    #                         {
-    #                             "side": "left",
-    #                             "sticky": "",
-    #                             "children": [("Radiobutton.label", {"sticky": "nswe"})],
-    #                         },
-    #                     ),
-    #                 ],
-    #             },
-    #         )
-    #     ],
-    # )
-    sty.map(
-        "TRadiobutton",
-        background=[
-            ("disabled", disabledcolor),
-            ("pressed", activebgcolor),
-            ("active", activebgcolor),
-            ("hover", activebgcolor),
-        ],
-        foreground=[
-            ("disabled", disabledfgcolor),
-            ("pressed", activefgcolor),
-            ("active", activefgcolor),
-            ("hover", activefgcolor),
-        ],
-    )
-    # ===================================================
-    # Style for ALL TProgressbars
-    # ===================================================
-    # TROUGH_COLOR = 'lightblue2'
-    # BAR_COLOR = 'navajowhite2'
-    sty.configure(
-        "bar.Horizontal.TProgressbar",
-        troughcolor=troughcolor,
-        bordercolor=troughcolor,
-        background=barcolor,
-        lightcolor=barcolor,
-        darkcolor=barcolor,
-    )
 
     # ===================================================
     # Style for ALL TScale widgets
     # ===================================================
-    # TROUGH_COLOR = 'lightblue2'
-    # BAR_COLOR = 'navajowhite2'
+
     sty.configure(
         "bar.Horizontal.TScale",
         troughcolor=troughcolor,
@@ -307,18 +365,24 @@ def create_styles(sty):
     # Style for ALL TSpinbox Widgets
     # ===================================================
     sty.configure(
-        "Custom.TSpinbox",
+        "TSpinbox",
+        arrowsize=11,
         bordercolor=_bordercolor,
-        background=bgcolor,
-        foreground=fgcolor,
+        background=activebgcolor,
+        foreground="black",
         lightcolor=_lightcolor,
         darkcolor=_darkcolor,
         selectbackground="springgreen2",
         selectforeground="black",
-        fieldbackground=fieldbgcolor,
-        fieldforeground=fieldfgcolor,
-        arrowcolor=disabledcolor,
+        fieldbackground=tvwindow,
+        fieldforeground="black",
+        arrowcolor="black",
     )
+
+    # ===================================================
+    # Style for ALL TEntry widgets
+    # ===================================================
+    sty.configure("TEntry", foreground="black", fieldbackground=tvwindow)
 
     # ===================================================
     # Style for ALL TFrame widgets
@@ -346,12 +410,7 @@ def create_styles(sty):
         background=bgcolor,
         padding=[12, 6],
     )
-    # sty.theme_settings("default",
-    #                    {'TLabelframe.Label': {
-    #                        'configure': {
-    #                            "padding": 7
-    #                        }
-    #                    }})
+
     # ===================================================
     # Style for ALL ScrolledTreeview widgets
     # ===================================================
@@ -360,13 +419,26 @@ def create_styles(sty):
         background=tvwindow,
         foreground="black",
         selected=selectbackground,
+        fieldbackground=tvwindow,
         # fieldforeground="black",
+        font="Ubuntu 11 bold",
     )
-    # sty.configure("Heading",font=TkHeadingFont,relief="raised",padding=3)
+    sty.configure("heading", relief="sunken", background=bgcolor, font="Ubuntu 11 bold")
+    sty.configure("item", foreground="black", padding=[3, 3])
+    sty.configure("cell", padding=[6, 6])
     # ===================================================
     # Style for ALL TMenuButton
     # ===================================================
-    sty.configure("TMenubutton", width=11, padding=5, relief="raised")
+    sty.configure(
+        "TMenubutton",
+        background=bgcolor,
+        foreground=fgcolor,
+        width=25,
+        padding=2,
+        relief="raised",
+        font="Ubuntu 9 bold",
+    )
+
     # ===================================================
     # Style for ALL TPanedwindow
     # ===================================================
@@ -382,10 +454,16 @@ def create_styles(sty):
         sashthickness=8,
         gripcount=10,
     )
+
     # ===================================================
     # Style for ALL TScrollbars
     # ===================================================
     sty.configure("TScrollbar", gripcount=10)
+
+    # ===================================================
+    # Style for ALL TSeparators
+    # ===================================================
+    sty.configure("TSeparator", background="whitesmoke")
 
 
 def add_options(toplevel):
@@ -393,6 +471,8 @@ def add_options(toplevel):
     toplevel.option_add("*TCombobox*Listbox*Foreground", "black")
     toplevel.option_add("*TCombobox*Listbox*selectBackground", selectbackground)
     toplevel.option_add("*TCombobox*Listbox*selectForeground", selectforeground)
+    toplevel.option_add("TkFDialog*Foreground", "black")
+    toplevel.option_add("TkChooseDir*Foreground", "black")
 
 
 def get_version():

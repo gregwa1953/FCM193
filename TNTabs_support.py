@@ -28,7 +28,6 @@ import TNTabs
 _debug = True  # False to eliminate debug printing from callback functions.
 location = TNTabs._location
 
-
 def main(*args):
     """Main entry point for the application."""
     global root
@@ -40,7 +39,6 @@ def main(*args):
     _w1 = TNTabs.Toplevel1(_top1)
     startup()
     root.mainloop()
-
 
 def startup():
     global sty
@@ -68,9 +66,9 @@ def startup():
     #  The default position is "nw"
     # ===================================================
     set_tab_position("nw")
+    _w1.selectedButton.set(1)
     _top1.title("TNotebook Tab Position Demo")
     centre_screen(794, 644)
-
 
 def fix_labels():
     global background1
@@ -85,7 +83,6 @@ def fix_labels():
     _w1.TLabTab3.set("This is a TLabel")
     _w1.TLabTab4.set("This is a TLabel")
 
-
 def color_notebook_pages():
     global background1
     #    background1 = mystyles_dark.bgcolor
@@ -94,7 +91,6 @@ def color_notebook_pages():
     _w1.TNotebook1_t2.configure(background=background1)
     _w1.TNotebook1_t3.configure(background=background1)
     _w1.TNotebook1_t4.configure(background=background1)
-
 
 def setup_base_style():
     global debug
@@ -115,7 +111,6 @@ def setup_base_style():
         foreground=[("selected", "white"), ("active", "black"), ("!active", "black")],
     )
 
-
 def set_tab_position(which):
     style = ttk.Style()
     positions = ["nw", "n", "ne", "en", "e", "es", "sw", "s", "se", "wn", "w", "ws"]
@@ -125,7 +120,6 @@ def set_tab_position(which):
         print(f"parameter {which} is not a valid position!")
         style.configure("TNotebook", tabposition="nw")
     _top1.update()
-
 
 def on_TRB_Click(*args):
     if _debug:
@@ -175,7 +169,6 @@ def on_TRB_Click(*args):
         set_tab_position("n")
         set_tab_position("wn")
 
-
 def on_btnExit(*args):
     if _debug:
         print("TNTabs_support.on_btnExit")
@@ -184,7 +177,6 @@ def on_btnExit(*args):
         sys.stdout.flush()
     sys.exit()
 
-
 def centre_screen(wid, hei):
     ws = root.winfo_screenwidth()
     hs = root.winfo_screenheight()
@@ -192,6 +184,9 @@ def centre_screen(wid, hei):
     y = (hs / 2) - (hei / 2)
     root.geometry("%dx%d+%d+%d" % (wid, hei, x, y))
 
-
 if __name__ == "__main__":
     TNTabs.start_up()
+
+
+
+
